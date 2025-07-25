@@ -26,17 +26,46 @@ NOTE: If you are having issues with permissions. And you get error:
 -- NOTE: This has been updated from the video to fix issues with encoding
 
 COPY company_dim
-FROM 'C:\Program Files\PostgreSQL\16\data\Datasets\sql_course\company_dim.csv'
+FROM 'F:\my project in python\Sql_Project_DataAnalysis_job\csv_files\company_dim.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', ENCODING 'UTF8');
 
 COPY skills_dim
-FROM 'C:\Program Files\PostgreSQL\16\data\Datasets\sql_course\skills_dim.csv'
+FROM 'F:\my project in python\Sql_Project_DataAnalysis_job\csv_files\skills_dim.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', ENCODING 'UTF8');
 
 COPY job_postings_fact
-FROM 'C:\Program Files\PostgreSQL\16\data\Datasets\sql_course\job_postings_fact.csv'
+FROM 'F:\my project in python\Sql_Project_DataAnalysis_job\csv_files\job_postings_fact.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', ENCODING 'UTF8');
 
 COPY skills_job_dim
-FROM 'C:\Program Files\PostgreSQL\16\data\Datasets\sql_course\skills_job_dim.csv'
+FROM 'F:\my project in python\Sql_Project_DataAnalysis_job\csv_files\skills_job_dim.csv'
 WITH (FORMAT csv, HEADER true, DELIMITER ',', ENCODING 'UTF8');
+
+
+SELECT name as company_name
+FROM company_dim
+WHERE company_id in (
+    SELECT company_id  
+    FROM 
+        job_postings_fact   
+    WHERE 
+        job_no_degree_mention = TRUE
+    ORDER BY 
+        company_id    
+
+);
+
+
+WITH company_cte AS(
+    SELECT  
+        company_id,
+        count(*) as total_count
+    FROM job_postings_fact
+    GROUP BY company_id 
+)
+
+SELECT 
+    name as company_name,
+    company_cte.total_count
+FROM company_dim 
+LEFT JOIN company_cte ON company_cte.company_id = company_dim.company_id
